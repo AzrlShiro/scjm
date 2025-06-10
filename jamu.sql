@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jun 10, 2025 at 07:43 PM
+-- Generation Time: Jun 10, 2025 at 08:14 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.3.10
 
@@ -405,7 +405,8 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('FUf1LH3KAdtXLsYIX1HzKy6XC9IeAQrbQUXtRRen', 4, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoicGpQYVlGMXBNYUdNY2ttdlRwTlhDWDRXOUcxSUlWYW5sWUw4Z0hqbyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9kYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo0O30=', 1749584346);
+('8W3y0keFEkkkjB8m2gK91hk8JywA4djjs1Zn9NCK', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiajBpRG1lZFBuMEhWbUVvcXhMa1d5d29OTkdmRWVJdldCaXF0OUtWZCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJuZXciO2E6MDp7fXM6Mzoib2xkIjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9sb2dpbiI7fX0=', 1749586397),
+('bvxwA04QRiDoAAcwZYEmHh4cAWzw8Xzl3yitTfTi', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiTUN0Nk5ySFlyMmNWRUEzMldSN3hTc1V3Z09GaG12S0lXYUlHOWo1SiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1749585889);
 
 -- --------------------------------------------------------
 
@@ -492,7 +493,9 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
 (1, 'Test User', 'test@example.com', '2025-06-10 09:45:47', '$2y$12$B/FE1s2rN5eMpBp7LjhTd.W40aAczYR/wJyIf.I49tAYDaqyfoLe.', 'RENb5x54nY', '2025-06-10 09:45:48', '2025-06-10 09:45:48'),
-(4, 'Azriel Saragih', 'azriel@gmail.com', NULL, '$2y$12$KNindhG7hN/jCSxxVst9aea69SVBqERWgl3Q4epwXV7yVvHAtGiAq', NULL, '2025-06-10 12:08:31', '2025-06-10 12:08:31');
+(4, 'Azriel Saragih', 'azriel@gmail.com', NULL, '$2y$12$KNindhG7hN/jCSxxVst9aea69SVBqERWgl3Q4epwXV7yVvHAtGiAq', NULL, '2025-06-10 12:08:31', '2025-06-10 12:08:31'),
+(5, 'Admin A', 'admina@gmail.com', NULL, '$2y$12$Atkq/76XdlIwhfHPzTQ4SeXccerKZcfB74Uc7CQ0DFFq6jwuqbshK', NULL, '2025-06-10 13:00:30', '2025-06-10 13:00:30'),
+(6, 'Admin B', 'adminb@gmail.com', NULL, '$2y$12$qGMIMK..aC9xNxqaifzg8u5uvrl0gc9/B3ZoOgQxkEED3q4i6sriy', NULL, '2025-06-10 13:12:48', '2025-06-10 13:12:48');
 
 --
 -- Indexes for dumped tables
@@ -773,7 +776,7 @@ ALTER TABLE `shipment_trackings`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables

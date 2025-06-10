@@ -80,13 +80,32 @@
             <!-- Main Content -->
             <div class="col-md-10">
                 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-                    <div class="container-fluid">
-                        <span class="navbar-brand">@yield('title', 'Dashboard')</span>
-                        <div class="navbar-nav ms-auto">
-                            <span class="navbar-text">
-                                <i class="fas fa-user-circle me-1"></i> Admin
-                            </span>
+                    <div class="navbar-nav ms-auto">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: #2c3e50; text-decoration: none;">
+                                <i class="fas fa-user-circle me-2"></i>
+                                <span>{{ Auth::user()->name ?? 'Admin' }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                                <li>
+                                    <h6 class="dropdown-header">
+                                        <i class="fas fa-user me-2"></i>{{ Auth::user()->email ?? 'admin@jamumadura.com' }}
+                                    </h6>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>
+                                        <span class="text-danger">Keluar</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
+
+                        <!-- Form logout tersembunyi -->
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
                     </div>
                 </nav>
 

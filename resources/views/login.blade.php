@@ -14,7 +14,7 @@
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-100 min-h-screen flex items-center justify-center relative"
-      style="background-image: url('{{ asset('images/bg-jamu-madura.jpg') }}'); background-size: cover; background-position: center;">
+      style="background-image: url('{{ asset('images/bg-jamu-madura.png') }}'); background-size: cover; background-position: center;">
 
     {{-- Overlay untuk membuat teks lebih jelas --}}
     <div class="absolute inset-0 bg-overlay"></div>
@@ -27,17 +27,35 @@
             <p class="text-gray-600 mt-1 text-lg">Manajemen Supply Chain Jamu Madura</p>
         </div>
 
+        {{-- Tampilkan pesan error umum --}}
+        @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- Tampilkan pesan sukses --}}
+        @if (session('success'))
+            <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                {{ session('success') }}
+            </div>
+        @endif
+
         {{-- Form Login Laravel Breeze --}}
-        <form method="post" action="{{ route('login.action') }}">
+        <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            {{-- Input Email/Username --}}
+            {{-- Input Email --}}
             <div class="mb-5">
-                <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">email</label>
+                <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">Email</label>
                 <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
                        class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent @error('email') border-red-500 @enderror"
                        placeholder="contoh@jamumadura.com">
-                @error('username')
+                @error('email')
                     <p class="text-red-600 text-xs italic mt-2">{{ $message }}</p>
                 @enderror
             </div>
@@ -74,6 +92,15 @@
                 </button>
             </div>
         </form>
+
+        {{-- Link ke Registrasi --}}
+        <div class="text-center mt-6">
+            <p class="text-gray-600">Belum punya akun?
+                <a href="{{ route('register') }}" class="font-semibold text-green-600 hover:text-green-800 transition-colors duration-200">
+                    Daftar di sini
+                </a>
+            </p>
+        </div>
 
         {{-- Footer Informasi --}}
         <div class="text-center mt-8 text-sm text-gray-500">

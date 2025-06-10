@@ -1,26 +1,44 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Pengiriman')
+@section('title', 'Detail Pengiriman - ' . $shipment->shipment_code)
 
 @section('content')
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4><i class="fas fa-eye me-2"></i>Detail Pengiriman - {{ $shipment->shipment_code }}</h4>
+    <div>
+        @if($shipment->status !== 'delivered' && $shipment->status !== 'cancelled')
+        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+            <i class="fas fa-edit me-2"></i>Update Status
+        </button>
+        @endif
+        <a href="{{ route('shipments.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
+</div>
+
 <div class="row">
-    <!-- Detail Umum -->
+    <!-- Informasi Pengiriman -->
     <div class="col-md-8">
         <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-info-circle me-2"></i>Detail Pengiriman: {{ $shipment->shipment_code }}</h5>
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informasi Pengiriman</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <table class="table table-borderless">
                             <tr>
+                                <td><strong>Kode Pengiriman:</strong></td>
+                                <td>{{ $shipment->shipment_code }}</td>
+                            </tr>
+                            <tr>
                                 <td><strong>Distributor:</strong></td>
                                 <td>{{ $shipment->distributor->name }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Alamat:</strong></td>
-                                <td>{{ $shipment->distributor->full_address }}</td>
+                                <td><strong>Alamat Distributor:</strong></td>
+                                <td>{{ $shipment->distributor->address }}, {{ $shipment->distributor->city }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Tanggal Order:</strong></td>
@@ -31,10 +49,10 @@
                                 <td>
                                     @php
                                         $priorityColors = [
-                                            'low' => 'success',
-                                            'medium' => 'warning',
-                                            'high' => 'danger',
-                                            'urgent' => 'dark'
+                                            'low' => 'secondary',
+                                            'medium' => 'info',
+                                            'high' => 'warning',
+                                            'urgent' => 'danger'
                                         ];
                                     @endphp
                                     <span class="badge bg-{{ $priorityColors[$shipment->priority] }}">
@@ -47,52 +65,41 @@
                     <div class="col-md-6">
                         <table class="table table-borderless">
                             <tr>
-                                <td><strong>Total Berat:</strong></td>
-                                <td>{{ number_format($shipment->total_weight, 2) }} kg</td>
+                                <td><strong>Rute Pengiriman:</strong></td>
+                                <td>{{ $shipment->deliverySchedule->route->name ?? 'N/A' }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Total Item:</strong></td>
-                                <td>{{ $shipment->total_items }} item</td>
+                                <td><strong>Jadwal Keberangkatan:</strong></td>
+                                <td>{{ $shipment->deliverySchedule->departure_date->format('d F Y H:i') }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Total Nilai:</strong></td>
-                                <td>Rp {{ number_format($shipment->total_value, 0, ',', '.') }}</td>
+                                <td><strong>Estimasi Tiba:</strong></td>
+                                <td>{{ $shipment->deliverySchedule->estimated_arrival->format('d F Y H:i') }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Status:</strong></td>
-                                <td>
-                                    @php
-                                        $statusColors = [
-                                            'pending' => 'secondary',
-                                            'confirmed' => 'info',
-                                            'packed' => 'warning',
-                                            'shipped' => 'primary',
-                                            'in_transit' => 'warning',
-                                            'delivered' => 'success',
-                                            'cancelled' => 'danger'
-                                        ];
-                                    @endphp
-                                    <span class="badge bg-{{ $statusColors[$shipment->status] ?? 'secondary' }} fs-6">
-                                        {{ ucfirst(str_replace('_', ' ', $shipment->status)) }}
-                                    </span>
-                                </td>
+                                <td><strong>Tanggal Kirim:</strong></td>
+                                <td>{{ $shipment->shipped_at ? $shipment->shipped_at->format('d F Y H:i') : '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanggal Diterima:</strong></td>
+                                <td>{{ $shipment->delivered_at ? $shipment->delivered_at->format('d F Y H:i') : '-' }}</td>
                             </tr>
                         </table>
                     </div>
                 </div>
-
                 @if($shipment->special_instructions)
-                <div class="alert alert-info">
-                    <strong>Instruksi Khusus:</strong> {{ $shipment->special_instructions }}
+                <div class="mt-3">
+                    <strong>Instruksi Khusus:</strong>
+                    <p class="text-muted mt-1">{{ $shipment->special_instructions }}</p>
                 </div>
                 @endif
             </div>
         </div>
 
-        <!-- Item Pengiriman -->
+        <!-- Daftar Produk -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-boxes me-2"></i>Item Pengiriman</h5>
+                <h5 class="mb-0"><i class="fas fa-box me-2"></i>Daftar Produk Jamu</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -100,186 +107,214 @@
                         <thead>
                             <tr>
                                 <th>Produk</th>
-                                <th>Qty</th>
+                                <th>Quantity</th>
                                 <th>Harga Satuan</th>
-                                <th>Berat</th>
-                                <th>Subtotal</th>
+                                <th>Berat (kg)</th>
+                                <th>Total Harga</th>
+                                <th>Catatan</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($shipment->items as $item)
+                            @foreach($shipment->items as $item)
                             <tr>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        @if($item->product->image)
-                                        <img src="{{ asset('storage/' . $item->product->image) }}"
-                                             alt="{{ $item->product->name }}"
-                                             class="me-3"
-                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-                                        @endif
-                                        <div>
-                                            <strong>{{ $item->product->name }}</strong>
-                                            @if($item->product->sku)
-                                            <br><small class="text-muted">SKU: {{ $item->product->sku }}</small>
-                                            @endif
-                                        </div>
-                                    </div>
+                                    <strong>{{ $item->product->name }}</strong><br>
+                                    <small class="text-muted">{{ $item->product->category ?? 'Jamu Tradisional' }}</small>
                                 </td>
                                 <td>{{ $item->quantity }}</td>
                                 <td>Rp {{ number_format($item->unit_price, 0, ',', '.') }}</td>
-                                <td>{{ number_format($item->weight, 2) }} kg</td>
-                                <td>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                <td>{{ number_format($item->weight, 2) }}</td>
+                                <td>Rp {{ number_format($item->total_price, 0, ',', '.') }}</td>
+                                <td>{{ $item->notes ?? '-' }}</td>
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">Tidak ada item pengiriman</td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
-                        <tfoot>
-                            <tr class="table-active">
-                                <th colspan="4">Total</th>
-                                <th>Rp {{ number_format($shipment->total_value, 0, ',', '.') }}</th>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
         </div>
 
         <!-- Tracking History -->
-        @if($shipment->trackingHistory && $shipment->trackingHistory->count() > 0)
-        <div class="card mb-4">
+        <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-route me-2"></i>Riwayat Tracking</h5>
+                <h5 class="mb-0"><i class="fas fa-route me-2"></i>Riwayat Tracking</h5>
             </div>
             <div class="card-body">
+                @if($shipment->trackings->count() > 0)
                 <div class="timeline">
-                    @foreach($shipment->trackingHistory->sortByDesc('created_at') as $track)
+                    @foreach($shipment->trackings as $tracking)
                     <div class="timeline-item">
-                        <div class="timeline-marker bg-{{ $statusColors[$track->status] ?? 'secondary' }}"></div>
+                        <div class="timeline-marker bg-primary"></div>
                         <div class="timeline-content">
-                            <h6 class="mb-1">{{ ucfirst(str_replace('_', ' ', $track->status)) }}</h6>
-                            <p class="mb-1">{{ $track->description }}</p>
-                            <small class="text-muted">
-                                {{ $track->created_at->format('d F Y H:i') }}
-                                @if($track->location)
-                                • {{ $track->location }}
-                                @endif
-                            </small>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ ucfirst(str_replace('_', ' ', $tracking->status)) }}</h6>
+                                    <p class="mb-1">{{ $tracking->description }}</p>
+                                    @if($tracking->location)
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ $tracking->location }}
+                                    </small>
+                                    @endif
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">
+                                        {{ $tracking->created_at->format('d/m/Y H:i') }}<br>
+                                        oleh {{ $tracking->updated_by }}
+                                    </small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     @endforeach
                 </div>
+                @else
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle fa-2x mb-2"></i>
+                    <p>Belum ada riwayat tracking</p>
+                </div>
+                @endif
             </div>
         </div>
-        @endif
     </div>
 
     <!-- Sidebar -->
     <div class="col-md-4">
-        <!-- Actions -->
+        <!-- Status Card -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-cog me-2"></i>Aksi</h5>
+                <h5 class="mb-0"><i class="fas fa-flag me-2"></i>Status Pengiriman</h5>
             </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    @if($shipment->status === 'pending')
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmModal">
-                        <i class="fas fa-check me-2"></i>Konfirmasi
-                    </button>
-                    @endif
-
-                    @if(in_array($shipment->status, ['confirmed', 'packed']))
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shipModal">
-                        <i class="fas fa-shipping-fast me-2"></i>Kirim
-                    </button>
-                    @endif
-
-                    @if($shipment->status !== 'cancelled')
-                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
-                        <i class="fas fa-edit me-2"></i>Update Status
-                    </button>
-                    @endif
-
-                    <a href="{{ route('shipments.print', $shipment) }}" class="btn btn-outline-primary" target="_blank">
-                        <i class="fas fa-print me-2"></i>Cetak Label
-                    </a>
-
-                    <a href="{{ route('shipments.index') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Kembali
-                    </a>
-
-                    @if($shipment->status === 'pending')
-                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
-                        <i class="fas fa-times me-2"></i>Batalkan
-                    </button>
-                    @endif
+            <div class="card-body text-center">
+                @php
+                    $statusColors = [
+                        'pending' => 'secondary',
+                        'confirmed' => 'info',
+                        'packed' => 'warning',
+                        'shipped' => 'primary',
+                        'in_transit' => 'warning',
+                        'delivered' => 'success',
+                        'cancelled' => 'danger'
+                    ];
+                @endphp
+                <div class="mb-3">
+                    <span class="badge bg-{{ $statusColors[$shipment->status] ?? 'secondary' }} p-3 fs-6">
+                        {{ ucfirst(str_replace('_', ' ', $shipment->status)) }}
+                    </span>
                 </div>
+
+                <!-- Progress Bar -->
+                @php
+                    $progress = [
+                        'pending' => 10,
+                        'confirmed' => 25,
+                        'packed' => 40,
+                        'shipped' => 60,
+                        'in_transit' => 80,
+                        'delivered' => 100,
+                        'cancelled' => 0
+                    ];
+                @endphp
+                @if($shipment->status !== 'cancelled')
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar bg-{{ $statusColors[$shipment->status] }}"
+                         style="width: {{ $progress[$shipment->status] }}%"></div>
+                </div>
+                <small class="text-muted">{{ $progress[$shipment->status] }}% Complete</small>
+                @endif
             </div>
         </div>
 
-        <!-- Informasi Pengiriman -->
+        <!-- Summary Card -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-truck me-2"></i>Info Pengiriman</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Ringkasan</h5>
             </div>
             <div class="card-body">
-                @if($shipment->courier)
-                <p><strong>Kurir:</strong> {{ $shipment->courier->name }}</p>
-                <p><strong>Service:</strong> {{ $shipment->service_type }}</p>
-                @endif
-
-                @if($shipment->tracking_number)
-                <p><strong>No. Resi:</strong>
-                    <span class="badge bg-info">{{ $shipment->tracking_number }}</span>
-                </p>
-                @endif
-
-                @if($shipment->estimated_delivery)
-                <p><strong>Estimasi Tiba:</strong> {{ $shipment->estimated_delivery->format('d F Y') }}</p>
-                @endif
-
-                @if($shipment->delivery_cost)
-                <p><strong>Biaya Kirim:</strong> Rp {{ number_format($shipment->delivery_cost, 0, ',', '.') }}</p>
-                @endif
+                <div class="row text-center">
+                    <div class="col-12 mb-3">
+                        <h4 class="text-primary mb-0">{{ $shipment->total_items }}</h4>
+                        <small class="text-muted">Total Item</small>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <h4 class="text-warning mb-0">{{ number_format($shipment->total_weight, 2) }} kg</h4>
+                        <small class="text-muted">Total Berat</small>
+                    </div>
+                    <div class="col-12">
+                        <h4 class="text-success mb-0">Rp {{ number_format($shipment->total_value, 0, ',', '.') }}</h4>
+                        <small class="text-muted">Total Nilai</small>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Contact Info -->
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-address-book me-2"></i>Kontak</h5>
+                <h5 class="mb-0"><i class="fas fa-phone me-2"></i>Kontak Distributor</h5>
             </div>
             <div class="card-body">
-                @if($shipment->distributor->phone)
-                <p><strong>Telepon:</strong>
-                    <a href="tel:{{ $shipment->distributor->phone }}">{{ $shipment->distributor->phone }}</a>
+                <p class="mb-2"><strong>{{ $shipment->distributor->name }}</strong></p>
+                <p class="mb-1">
+                    <i class="fas fa-phone me-2"></i>{{ $shipment->distributor->phone ?? 'N/A' }}
                 </p>
-                @endif
-
-                @if($shipment->distributor->email)
-                <p><strong>Email:</strong>
-                    <a href="mailto:{{ $shipment->distributor->email }}">{{ $shipment->distributor->email }}</a>
+                <p class="mb-1">
+                    <i class="fas fa-envelope me-2"></i>{{ $shipment->distributor->email ?? 'N/A' }}
                 </p>
-                @endif
-
-                @if($shipment->contact_person)
-                <p><strong>PIC:</strong> {{ $shipment->contact_person }}</p>
-                @endif
+                <p class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>{{ $shipment->distributor->city }}
+                </p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modals -->
-@include('shipments.modals.confirm')
-@include('shipments.modals.ship')
-@include('shipments.modals.update-status')
-@include('shipments.modals.cancel')
-
-@endsection
+<!-- Modal Update Status -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Status - {{ $shipment->shipment_code }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('shipments.update-status', $shipment) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status Baru</label>
+                        <select class="form-select" id="status" name="status" required>
+                            @if($shipment->status === 'pending')
+                                <option value="confirmed">Confirmed</option>
+                            @elseif($shipment->status === 'confirmed')
+                                <option value="packed">Packed</option>
+                            @elseif($shipment->status === 'packed')
+                                <option value="shipped">Shipped</option>
+                            @elseif($shipment->status === 'shipped')
+                                <option value="in_transit">In Transit</option>
+                            @elseif($shipment->status === 'in_transit')
+                                <option value="delivered">Delivered</option>
+                            @endif
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                                  placeholder="Masukkan deskripsi status..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Lokasi</label>
+                        <input type="text" class="form-control" id="location" name="location"
+                               placeholder="Lokasi saat ini (opsional)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @push('styles')
 <style>
@@ -288,29 +323,30 @@
     padding-left: 30px;
 }
 
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.timeline-item:not(:last-child)::before {
+.timeline::before {
     content: '';
     position: absolute;
-    left: -21px;
-    top: 20px;
+    left: 12px;
+    top: 0;
+    bottom: 0;
     width: 2px;
-    height: calc(100% + 10px);
-    background-color: #dee2e6;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
 }
 
 .timeline-marker {
     position: absolute;
-    left: -25px;
+    left: -18px;
     top: 5px;
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
 }
 
 .timeline-content {
@@ -321,16 +357,4 @@
 }
 </style>
 @endpush
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    // Auto refresh tracking status every 30 seconds
-    @if(in_array($shipment->status, ['shipped', 'in_transit']))
-    setInterval(function() {
-        window.location.reload();
-    }, 30000);
-    @endif
-});
-</script>
-@endpush
+@endsection

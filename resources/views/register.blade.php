@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk Sistem - Supply Chain Jamu Madura</title>
+    <title>Daftar Akun - Supply Chain Jamu Madura</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -14,7 +14,7 @@
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-100 min-h-screen flex items-center justify-center relative"
-      style="background-image: url('{{ asset('images/bg-jamu-madura.jpg') }}'); background-size: cover; background-position: center;">
+      style="background-image: url('{{ asset('images/bg-jamu-madura.png') }}'); background-size: cover; background-position: center;">
 
     {{-- Overlay untuk membuat teks lebih jelas --}}
     <div class="absolute inset-0 bg-overlay"></div>
@@ -23,56 +23,90 @@
         <div class="text-center mb-8">
             {{-- Logo Perusahaan Jamu Madura --}}
             <img src="{{ asset('images/logo-jamu-madura.png') }}" alt="Logo Jamu Madura" class="mx-auto h-24 w-auto mb-4">
-            <h2 class="text-3xl font-extrabold text-gray-900 leading-tight">Masuk Sistem</h2>
+            <h2 class="text-3xl font-extrabold text-gray-900 leading-tight">Daftar Akun</h2>
             <p class="text-gray-600 mt-1 text-lg">Manajemen Supply Chain Jamu Madura</p>
         </div>
 
-        {{-- Form Login Laravel Breeze --}}
-        <form method="post" action="{{ route('registrasi.action') }}">
+        {{-- Tampilkan pesan error umum --}}
+        @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- Tampilkan pesan sukses --}}
+        @if (session('success'))
+            <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Form Registrasi --}}
+        <form method="POST" action="{{ route('register') }}">
             @csrf
 
-            {{-- Input Email/Username --}}
+            {{-- Input Nama --}}
             <div class="mb-5">
-                <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">name</label>
-                <input id="name" type="name" name="name" value="{{ old('name') }}" required autofocus
+                <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">Nama Lengkap</label>
+                <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
                        class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent @error('name') border-red-500 @enderror"
-                       placeholder="contoh@jamumadura.com">
-                @error('username')
+                       placeholder="Masukkan nama lengkap Anda">
+                @error('name')
                     <p class="text-red-600 text-xs italic mt-2">{{ $message }}</p>
                 @enderror
             </div>
 
+            {{-- Input Email --}}
             <div class="mb-5">
-                <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">email</label>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">Email</label>
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required
                        class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent @error('email') border-red-500 @enderror"
                        placeholder="contoh@jamumadura.com">
-                @error('username')
+                @error('email')
                     <p class="text-red-600 text-xs italic mt-2">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Input Password --}}
-            <div class="mb-6">
+            <div class="mb-5">
                 <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Kata Sandi</label>
-                <input id="password" type="password" name="password" required autocomplete="current-password"
-                       class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-800 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent @error('password') border-red-500 @enderror"
-                       placeholder="••••••••">
+                <input id="password" type="password" name="password" required autocomplete="new-password"
+                       class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent @error('password') border-red-500 @enderror"
+                       placeholder="Minimal 8 karakter">
                 @error('password')
-                    <p class="text-red-600 text-xs italic">{{ $message }}</p>
+                    <p class="text-red-600 text-xs italic mt-2">{{ $message }}</p>
                 @enderror
             </div>
 
+            {{-- Input Konfirmasi Password --}}
+            <div class="mb-6">
+                <label for="password_confirmation" class="block text-gray-700 text-sm font-semibold mb-2">Konfirmasi Kata Sandi</label>
+                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                       class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                       placeholder="Ulangi kata sandi">
+            </div>
 
-
-            {{-- Tombol Login --}}
+            {{-- Tombol Registrasi --}}
             <div class="flex items-center justify-center">
                 <button type="submit"
                         class="bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-200 w-full text-lg">
-                    Registrasi
+                    Daftar Akun
                 </button>
             </div>
         </form>
+
+        {{-- Link ke Login --}}
+        <div class="text-center mt-6">
+            <p class="text-gray-600">Sudah punya akun?
+                <a href="{{ route('login') }}" class="font-semibold text-green-600 hover:text-green-800 transition-colors duration-200">
+                    Masuk di sini
+                </a>
+            </p>
+        </div>
 
         {{-- Footer Informasi --}}
         <div class="text-center mt-8 text-sm text-gray-500">
